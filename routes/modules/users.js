@@ -8,12 +8,14 @@ const db = require('../../models')
 const User = db.User
 
 router.get('/login', (req, res) => {
+    req.flash('warning_msg', '請先登入才能使用！');
     res.render('login')
 })
 
 router.post('/login', passport.authenticate('local', {
     successRedirect: '/',
-    failureRedirect: '/users/login'
+    failureRedirect: '/users/login',
+    failureFlash: true
 }))
 
 router.get('/register', (req, res) => {
@@ -22,13 +24,32 @@ router.get('/register', (req, res) => {
 
 router.post('/register', (req, res) => {
     const { name, email, password, confirmPassword } = req.body
+    const errors = []
+
+    if (!name || !email || !password || !confirmPassword) {
+        errors.push({ message: '所有欄位都是必填。' })
+    }
+    if (password !== confirmPassword) {
+        errors.push({ message: '密碼與確認密碼不相符！' })
+    }
+    if (errors.length) {
+        return res.render('register', {
+            errors,
+            name,
+            email,
+            password,
+            confirmPassword
+        })
+    }
+
     User.findOne({ where: { email } }).then(user => {
         if (user) {
-            console.log('User already exists')
+            errors.push({ message: '這個 Email 已經註冊過了。' })
             return res.render('register', {
+                errors,
                 name,
                 email,
-                passwrod,
+                password,
                 confirmPassword
             })
         }
@@ -46,8 +67,11 @@ router.post('/register', (req, res) => {
 })
 
 router.get('/logout', (req, res) => {
-    req.logout()
-    res.redirect('/users/login')
+    req.logout(() => {
+        req.flash('success_msg', '你已經成功登出。');
+        res.redirect('/users/login')
+    })
+
 })
 
 module.exports = router  
