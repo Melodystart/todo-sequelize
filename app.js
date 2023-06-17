@@ -11,7 +11,7 @@ const usePassport = require('./config/passport') //載入一包 Passport 設定�
 const app = express()
 const PORT = 3000
 
-app.engine('hbs', exphbs.engine({defaultLayout: 'main', extname: '.hbs' }))
+app.engine('hbs', exphbs.engine({ defaultLayout: 'main', extname: '.hbs' }))
 app.set('view engine', 'hbs')
 
 app.use(session({
@@ -20,13 +20,13 @@ app.use(session({
   saveUninitialized: true
 }))
 
-app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 
 usePassport(app)
 
 app.use(routes)
-  
+
 app.listen(PORT, () => {
   console.log(`App is running on http://localhost:${PORT}`)
 })
